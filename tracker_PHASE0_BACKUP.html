@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Process Tracker Sidebar</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f4f8; padding: 10px; margin: 0; display: flex; justify-content: center; }
+        .container { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 310px; min-width: 310px; }
+        
+        /* Scoring Section */
+        .score-box { background: #e3f2fd; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 12px; border: 1px solid #bbdefb; }
+        .score-label { font-size: 10px; color: #555; text-transform: uppercase; font-weight: bold; }
+        .score-val { font-size: 26px; font-weight: bold; color: #1976d2; }
+        
+        /* Headers & Labels */
+        h3 { color: #0056b3; margin: 12px 0 6px 0; border-bottom: 2px solid #0056b3; padding-bottom: 3px; font-size: 13px; text-transform: uppercase; }
+        .task-group { margin-bottom: 12px; }
+        label { display: flex; align-items: center; padding: 6px 0; cursor: pointer; border-bottom: 1px solid #f0f0f0; font-size: 12px; transition: background 0.2s; }
+        label:hover { background: #f9f9f9; }
+        input[type="checkbox"] { margin-right: 12px; transform: scale(1.2); cursor: pointer; }
+        
+        /* Notes Area */
+        textarea { width: 100%; height: 110px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; padding: 8px; font-family: inherit; font-size: 12px; box-sizing: border-box; resize: none; border-left: 4px solid #0056b3; }
+        
+        /* Buttons */
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+        button { padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; text-transform: uppercase; }
+        .btn-copy { background: #28a745; color: white; }
+        .btn-reset { background: #dc3545; color: white; }
+        button:hover { opacity: 0.9; }
+        
+        /* Reminder Alert */
+        .hint { font-size: 11px; color: #d32f2f; font-weight: bold; margin-top: 15px; text-align: center; background: #ffebee; padding: 10px; border-radius: 4px; border: 1px solid #ef9a9a; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="score-box">
+        <div class="score-label">Process Contribution (70% Max)</div>
+        <div class="score-val" id="score">0%</div>
+    </div>
+
+    <div class="task-group">
+        <h3>Fundamentals</h3>
+        <label><input type="checkbox" class="task"> Checked customer data</label>
+        <label><input type="checkbox" class="task"> Balance & Payment Requested</label>
+        <label><input type="checkbox" class="task"> Reason for non-payment</label>
+        <label><input type="checkbox" class="task"> System investigation</label>
+        <label><input type="checkbox" class="task"> Best resolution for customer needs</label>
+        <label><input type="checkbox" class="task"> Added correct tickets/notes</label>
+        <label><input type="checkbox" class="task"> Checked Credit file</label>
+        <label><input type="checkbox" class="task"> Assessed vulnerability</label>
+    </div>
+
+    <div class="task-group">
+        <h3>Outcome & Future</h3>
+        <label><input type="checkbox" class="task"> Account Action/Follow-on</label>
+        <label><input type="checkbox" class="task"> Correct Info & Escalation</label>
+        <label><input type="checkbox" class="task"> Timescales & Self-Serve</label>
+	<label><input type="checkbox" class="task"> Debt Recovery & Reminders</label>
+	<label><input type="checkbox" class="task"> DD Guarentee + TW on Bill</label>
+    </div>
+
+    <h3>Call Notes</h3>
+    <textarea id="callNotes" placeholder="Type summary here..."></textarea>
+
+    <div class="btn-group">
+        <button class="btn-copy" id="copyBtn" onclick="copyNotes()">COPY NOTES</button>
+        <button class="btn-reset" onclick="resetTracker()">RESET ALL</button>
+    </div>
+    
+    <div class="hint">
+        REMINDER: Do credit file and PSR
+    </div>
+</div>
+
+<script>
+    const checkboxes = document.querySelectorAll('.task');
+    const scoreDisplay = document.getElementById('score');
+    const notesBox = document.getElementById('callNotes');
+
+    // Update the 70% weight calculation
+    function updateScore() {
+        const total = checkboxes.length;
+        const checked = document.querySelectorAll('.task:checked').length;
+        const finalScore = Math.round((checked / total) * 70);
+        scoreDisplay.textContent = finalScore + "%";
+        scoreDisplay.style.color = (finalScore === 70) ? "#28a745" : "#1976d2";
+    }
+
+    // Function to copy text from the textarea
+    function copyNotes() {
+        if (!notesBox.value) return; 
+        notesBox.select();
+        document.execCommand('copy');
+        const btn = document.getElementById('copyBtn');
+        btn.innerText = "COPIED!";
+        setTimeout(() => { btn.innerText = "COPY NOTES"; }, 1500);
+    }
+
+    // Reset checkboxes and notes
+    function resetTracker() {
+        if(confirm("Confirm: Clear current call data?")) {
+            checkboxes.forEach(cb => cb.checked = false);
+            notesBox.value = "";
+            updateScore();
+        }
+    }
+
+    // Event listeners
+    checkboxes.forEach(cb => cb.addEventListener('change', updateScore));
+</script>
+
+</body>
+</html>
