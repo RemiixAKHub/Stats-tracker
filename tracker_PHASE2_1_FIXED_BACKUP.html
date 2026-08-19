@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Collections Assistant — Phase 4</title>
+    <title>Collections Assistant — Phase 2.1</title>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -314,91 +314,6 @@
             background: #eef5fb;
             border-radius: 4px;
         }
-        /* Phase 3 — Guided call prompts */
-        details.qm-prompt {
-            display: none;
-            margin: 8px 0 10px;
-            border: 1px solid #b9d5f2;
-            border-radius: 5px;
-            background: #f2f7fc;
-        }
-        details.qm-prompt.visible { display: block; }
-        details.qm-prompt summary {
-            cursor: pointer;
-            padding: 7px 9px;
-            font-size: 10px;
-            font-weight: bold;
-            color: #0056b3;
-            list-style: none;
-            text-transform: uppercase;
-        }
-        details.qm-prompt summary::-webkit-details-marker { display: none; }
-        details.qm-prompt summary::before { content: '▸'; margin-right: 6px; }
-        details.qm-prompt[open] summary::before { content: '▾'; }
-        .qm-prompt-body {
-            padding: 0 9px 8px;
-            font-size: 10px;
-            line-height: 1.35;
-            color: #334155;
-        }
-        .qm-prompt-body strong { color: #0056b3; }
-        .qm-prompt-dismiss {
-            float: right;
-            border: 0;
-            background: transparent;
-            color: #777;
-            cursor: pointer;
-            font-size: 12px;
-            padding: 0 2px;
-        }
-        .qm-toggle-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            margin: 6px 0 8px;
-            padding: 5px 0;
-        }
-        .qm-toggle-label {
-            font-size: 9px;
-            font-weight: bold;
-            color: #555;
-            text-transform: uppercase;
-            letter-spacing: .25px;
-        }
-        .qm-toggle {
-            border: 1px solid #b8c6d6;
-            background: #fff;
-            color: #555;
-            border-radius: 4px;
-            padding: 4px 8px;
-            font-size: 9px;
-            font-weight: bold;
-            cursor: pointer;
-            min-width: 74px;
-        }
-        .qm-toggle.on {
-            background: #e8f2ff;
-            border-color: #8bb8e8;
-            color: #0056b3;
-        }
-        .qm-toggle.off {
-            background: #f4f4f4;
-            color: #777;
-        }
-
-        .snapshot { margin: 0 0 12px; border: 1px solid #c8d0d9; border-radius: 6px; background: #fafbfd; }
-        .snapshot summary { cursor: pointer; padding: 8px 10px; font-size: 11px; font-weight: bold; color: #0056b3; text-transform: uppercase; }
-        .snapshot[open] summary { border-bottom: 1px solid #e1e6ec; }
-        .snapshot-content { padding: 8px; }
-        .snapshot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-        .snapshot-field { min-width: 0; }
-        .snapshot-field.full { grid-column: 1 / -1; }
-        .snapshot-field label { display: block; border: 0; padding: 0 0 3px; font-size: 9px; font-weight: bold; color: #555; text-transform: uppercase; cursor: default; }
-        .snapshot-field input, .snapshot-field select { width: 100%; padding: 6px; border: 1px solid #c8d0d9; border-radius: 4px; font-size: 11px; background: #fff; }
-        .snapshot-actions { display: flex; justify-content: flex-end; margin-top: 6px; }
-        .snapshot-clear { border: 1px solid #c8d0d9; background: #fff; color: #555; border-radius: 4px; padding: 4px 7px; font-size: 9px; font-weight: bold; cursor: pointer; }
-        .snapshot-note { margin-top: 6px; font-size: 9px; color: #777; line-height: 1.3; }
         .phase-tag {
             text-align: center;
             font-size: 9px;
@@ -429,75 +344,11 @@
         <button id="outboundBtn" onclick="setCallType('Outbound')">Outbound</button>
     </div>
 
-    <div class="qm-toggle-row">
-        <span class="qm-toggle-label">QM Guidance</span>
-        <button id="qmGuidanceToggle" class="qm-toggle on" type="button" onclick="toggleQmGuidance()" aria-pressed="true">ON</button>
-    </div>
-
-    <details class="snapshot" id="accountSnapshot">
-        <summary>Customer / Account Snapshot</summary>
-        <div class="snapshot-content">
-            <div class="snapshot-grid">
-                <div class="snapshot-field">
-                    <label for="snapCustomer">Customer</label>
-                    <input id="snapCustomer" type="text" placeholder="Customer name">
-                </div>
-                <div class="snapshot-field">
-                    <label for="snapAccount">Account</label>
-                    <input id="snapAccount" type="text" placeholder="Account number">
-                </div>
-                <div class="snapshot-field">
-                    <label for="snapBalance">Balance</label>
-                    <input id="snapBalance" type="text" placeholder="e.g. £486.21">
-                </div>
-                <div class="snapshot-field">
-                    <label for="snapStatus">Account status</label>
-                    <input id="snapStatus" type="text" placeholder="e.g. Active">
-                </div>
-                <div class="snapshot-field">
-                    <label for="snapStage">Collections stage</label>
-                    <input id="snapStage" type="text" placeholder="e.g. Reminder 3">
-                </div>
-                <div class="snapshot-field">
-                    <label for="snapOccupiers">Occupiers</label>
-                    <input id="snapOccupiers" type="text" placeholder="e.g. 2">
-                </div>
-                <div class="snapshot-field full">
-                    <label for="snapProperty">Property</label>
-                    <input id="snapProperty" type="text" placeholder="Property / address">
-                </div>
-                <div class="snapshot-field">
-                    <label for="snapPostcode">Postcode</label>
-                    <input id="snapPostcode" type="text" placeholder="e.g. SN2 XXX">
-                </div>
-                <div class="snapshot-field">
-                    <label for="snapPsr">PSR</label>
-                    <select id="snapPsr">
-                        <option value="">Select...</option>
-                        <option>Yes</option>
-                        <option>No</option>
-                        <option>N/A</option>
-                    </select>
-                </div>
-                <div class="snapshot-field full">
-                    <label for="snapLastPayment">Last payment</label>
-                    <input id="snapLastPayment" type="text" placeholder="e.g. £25 on 04/08/2026">
-                </div>
-            </div>
-            <div class="snapshot-note">Manual snapshot for quick reference. C4C integration is not part of this phase.</div>
-            <div class="snapshot-actions"><button class="snapshot-clear" type="button" onclick="clearSnapshot()">CLEAR SNAPSHOT</button></div>
-        </div>
-    </details>
-
     <div class="outstanding" id="outstanding">
         <strong>Still to complete</strong>
         <ul id="outstandingList"></ul>
     </div>
     <div class="ready" id="readyMessage">CALL WORKFLOW COMPLETE — CHECK NOTES BEFORE WRAP-UP</div>
-    <details class="qm-prompt" id="qmPrompt">
-        <summary>QM Quick Prompt <button class="qm-prompt-dismiss" type="button" onclick="dismissQmPrompt(event)" aria-label="Dismiss prompt">×</button></summary>
-        <div class="qm-prompt-body" id="qmPromptBody"></div>
-    </details>
 
     <div class="task-group">
         <h3>Customer &amp; Security</h3>
@@ -589,7 +440,6 @@
                         <option value="">Select...</option>
                         <option>Yes</option>
                         <option>No</option>
-                        <option>N/A</option>
                     </select>
                 </div>
                 <div class="notes-field">
@@ -649,7 +499,7 @@
     </div>
 
     <div class="hint">REMINDER: Complete controllable checks before wrap-up. QM observations are assessed separately.</div>
-    <div class="phase-tag">Collections Assistant — Phase 4</div>
+    <div class="phase-tag">Collections Assistant — Phase 2.1</div>
 </div>
 
 <script>
@@ -668,37 +518,6 @@
     const outboundReason = document.getElementById('outboundReason');
     const inboundReason = document.getElementById('inboundReason');
     const planDetails = document.getElementById('planDetails');
-    const qmGuidanceToggle = document.getElementById('qmGuidanceToggle');
-    let qmGuidanceEnabled = true;
-
-    function setQmGuidance(enabled, persist = true) {
-        qmGuidanceEnabled = enabled;
-        qmGuidanceToggle.textContent = enabled ? 'ON' : 'OFF';
-        qmGuidanceToggle.classList.toggle('on', enabled);
-        qmGuidanceToggle.classList.toggle('off', !enabled);
-        qmGuidanceToggle.setAttribute('aria-pressed', String(enabled));
-        if (!enabled) {
-            qmPrompt.open = false;
-            qmPrompt.classList.remove('visible');
-        }
-        if (persist) {
-            try { localStorage.setItem('collectionsAssistantQmGuidance', enabled ? 'on' : 'off'); } catch (e) {}
-        }
-    }
-
-    function toggleQmGuidance() {
-        setQmGuidance(!qmGuidanceEnabled);
-    }
-
-    function loadQmGuidancePreference() {
-        try {
-            const saved = localStorage.getItem('collectionsAssistantQmGuidance');
-            if (saved === 'on' || saved === 'off') setQmGuidance(saved === 'on', false);
-            else setQmGuidance(true, false);
-        } catch (e) {
-            setQmGuidance(true, false);
-        }
-    }
 
     function updateProgress() {
         const total = checkboxes.length;
@@ -736,15 +555,6 @@
         outboundBtn.classList.toggle('active', type === 'Outbound');
         outboundReason.style.display = type === 'Outbound' ? 'block' : 'none';
         inboundReason.style.display = type === 'Inbound' ? 'block' : 'none';
-        if (type) saveCallType(type);
-    }
-
-    function loadCallType() {
-        try {
-            const saved = localStorage.getItem('collectionsAssistantCallType');
-            if (saved === 'Inbound' || saved === 'Outbound') setCallType(saved);
-            else setCallType(null);
-        } catch (e) { setCallType(null); }
     }
 
     function updatePlanFields() {
@@ -834,19 +644,6 @@
         setTimeout(() => { btn.innerText = 'COPY NOTES'; }, 1500);
     }
 
-
-    function clearSnapshot() {
-        document.querySelectorAll('.snapshot input').forEach(input => input.value = '');
-        document.querySelectorAll('.snapshot select').forEach(select => select.value = '');
-    }
-
-    function saveCallType(type) {
-        try {
-            if (type) localStorage.setItem('collectionsAssistantCallType', type);
-            else localStorage.removeItem('collectionsAssistantCallType');
-        } catch (e) {}
-    }
-
     function resetTracker() {
         if (confirm('Confirm: Clear current call data?')) {
             checkboxes.forEach(cb => cb.checked = false);
@@ -862,87 +659,14 @@
             updatePlanFields();
             generatedNotes.value = '';
             notesStatus.style.display = 'none';
-            clearSnapshot();
-            document.getElementById('accountSnapshot').open = false;
-            qmPrompt.open = false;
-            qmPrompt.classList.remove('visible');
+            setCallType(null);
             updateProgress();
         }
     }
 
-    const qmPrompt = document.getElementById('qmPrompt');
-    const qmPromptBody = document.getElementById('qmPromptBody');
-
-    const qmPromptMap = {
-        'DPA / security completed': {
-            title: 'Signposting',
-            text: 'Explain why you need to complete the security checks so the customer understands what you are doing.'
-        },
-        'System investigation': {
-            title: 'Signposting',
-            text: 'Explain why you are checking the account or asking questions, especially before a period of silence or investigation.'
-        },
-        'Payment requested': {
-            title: 'Making numbers easy',
-            text: 'Explain the balance or payment clearly and check the customer understands what the figures mean.'
-        },
-        'DD Guarantee + TW on Bill': {
-            title: 'Making numbers easy',
-            text: 'Make the payment information clear and easy to understand, including any figures the customer needs to know.'
-        },
-        'Affordability assessed': {
-            title: 'Signposting',
-            text: 'Make it clear why you are asking the affordability questions and what they are helping you work out.'
-        },
-        'Best resolution identified': {
-            title: 'Setting clear expectations',
-            text: 'Be clear about the resolution and make sure the customer has the information they need about what will happen.'
-        },
-        'Account action / follow-on': {
-            title: 'Team Thames',
-            text: 'If another team or follow-on action is involved, explain who will handle it and what information or action is being passed on.'
-        },
-        'Correct information / escalation': {
-            title: 'Team Thames',
-            text: 'Make sure the information being passed on is clear and accurate, and explain the next action to the customer.'
-        },
-        'Timescales & self-serve': {
-            title: 'Setting clear expectations',
-            text: 'Give the customer the relevant next-step information and timescales without unnecessary jargon.'
-        },
-        'Summary completed': {
-            title: 'Summarising for clarity',
-            text: 'Confirm what was discussed and the action taken so the customer leaves the call clear on the resolution.'
-        },
-        'Next steps confirmed': {
-            title: 'Confirming next steps',
-            text: 'Make sure the customer knows what will happen next and when.'
-        }
-    };
-
-    function showQmPrompt(key) {
-        if (!qmGuidanceEnabled) return;
-        const prompt = qmPromptMap[key];
-        if (!prompt) return;
-        qmPromptBody.innerHTML = '<strong>' + prompt.title + ':</strong> ' + prompt.text;
-        qmPrompt.classList.add('visible');
-        qmPrompt.open = true;
-    }
-
-    function dismissQmPrompt(event) {
-        event.preventDefault();
-        event.stopPropagation();
-        qmPrompt.open = false;
-        qmPrompt.classList.remove('visible');
-    }
-
-    checkboxes.forEach(cb => cb.addEventListener('change', () => {
-        updateProgress();
-        if (cb.checked) showQmPrompt(cb.parentElement.textContent.trim());
-    }));
+    checkboxes.forEach(cb => cb.addEventListener('change', updateProgress));
     document.getElementById('notePlan').addEventListener('change', updatePlanFields);
-    loadQmGuidancePreference();
-    loadCallType();
+    setCallType(null);
     updatePlanFields();
     updateProgress();
 </script>

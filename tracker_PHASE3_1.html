@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Collections Assistant — Phase 4</title>
+    <title>Collections Assistant — Phase 3</title>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -386,19 +386,6 @@
             background: #f4f4f4;
             color: #777;
         }
-
-        .snapshot { margin: 0 0 12px; border: 1px solid #c8d0d9; border-radius: 6px; background: #fafbfd; }
-        .snapshot summary { cursor: pointer; padding: 8px 10px; font-size: 11px; font-weight: bold; color: #0056b3; text-transform: uppercase; }
-        .snapshot[open] summary { border-bottom: 1px solid #e1e6ec; }
-        .snapshot-content { padding: 8px; }
-        .snapshot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-        .snapshot-field { min-width: 0; }
-        .snapshot-field.full { grid-column: 1 / -1; }
-        .snapshot-field label { display: block; border: 0; padding: 0 0 3px; font-size: 9px; font-weight: bold; color: #555; text-transform: uppercase; cursor: default; }
-        .snapshot-field input, .snapshot-field select { width: 100%; padding: 6px; border: 1px solid #c8d0d9; border-radius: 4px; font-size: 11px; background: #fff; }
-        .snapshot-actions { display: flex; justify-content: flex-end; margin-top: 6px; }
-        .snapshot-clear { border: 1px solid #c8d0d9; background: #fff; color: #555; border-radius: 4px; padding: 4px 7px; font-size: 9px; font-weight: bold; cursor: pointer; }
-        .snapshot-note { margin-top: 6px; font-size: 9px; color: #777; line-height: 1.3; }
         .phase-tag {
             text-align: center;
             font-size: 9px;
@@ -433,61 +420,6 @@
         <span class="qm-toggle-label">QM Guidance</span>
         <button id="qmGuidanceToggle" class="qm-toggle on" type="button" onclick="toggleQmGuidance()" aria-pressed="true">ON</button>
     </div>
-
-    <details class="snapshot" id="accountSnapshot">
-        <summary>Customer / Account Snapshot</summary>
-        <div class="snapshot-content">
-            <div class="snapshot-grid">
-                <div class="snapshot-field">
-                    <label for="snapCustomer">Customer</label>
-                    <input id="snapCustomer" type="text" placeholder="Customer name">
-                </div>
-                <div class="snapshot-field">
-                    <label for="snapAccount">Account</label>
-                    <input id="snapAccount" type="text" placeholder="Account number">
-                </div>
-                <div class="snapshot-field">
-                    <label for="snapBalance">Balance</label>
-                    <input id="snapBalance" type="text" placeholder="e.g. £486.21">
-                </div>
-                <div class="snapshot-field">
-                    <label for="snapStatus">Account status</label>
-                    <input id="snapStatus" type="text" placeholder="e.g. Active">
-                </div>
-                <div class="snapshot-field">
-                    <label for="snapStage">Collections stage</label>
-                    <input id="snapStage" type="text" placeholder="e.g. Reminder 3">
-                </div>
-                <div class="snapshot-field">
-                    <label for="snapOccupiers">Occupiers</label>
-                    <input id="snapOccupiers" type="text" placeholder="e.g. 2">
-                </div>
-                <div class="snapshot-field full">
-                    <label for="snapProperty">Property</label>
-                    <input id="snapProperty" type="text" placeholder="Property / address">
-                </div>
-                <div class="snapshot-field">
-                    <label for="snapPostcode">Postcode</label>
-                    <input id="snapPostcode" type="text" placeholder="e.g. SN2 XXX">
-                </div>
-                <div class="snapshot-field">
-                    <label for="snapPsr">PSR</label>
-                    <select id="snapPsr">
-                        <option value="">Select...</option>
-                        <option>Yes</option>
-                        <option>No</option>
-                        <option>N/A</option>
-                    </select>
-                </div>
-                <div class="snapshot-field full">
-                    <label for="snapLastPayment">Last payment</label>
-                    <input id="snapLastPayment" type="text" placeholder="e.g. £25 on 04/08/2026">
-                </div>
-            </div>
-            <div class="snapshot-note">Manual snapshot for quick reference. C4C integration is not part of this phase.</div>
-            <div class="snapshot-actions"><button class="snapshot-clear" type="button" onclick="clearSnapshot()">CLEAR SNAPSHOT</button></div>
-        </div>
-    </details>
 
     <div class="outstanding" id="outstanding">
         <strong>Still to complete</strong>
@@ -589,7 +521,6 @@
                         <option value="">Select...</option>
                         <option>Yes</option>
                         <option>No</option>
-                        <option>N/A</option>
                     </select>
                 </div>
                 <div class="notes-field">
@@ -649,7 +580,7 @@
     </div>
 
     <div class="hint">REMINDER: Complete controllable checks before wrap-up. QM observations are assessed separately.</div>
-    <div class="phase-tag">Collections Assistant — Phase 4</div>
+    <div class="phase-tag">Collections Assistant — Phase 2.1</div>
 </div>
 
 <script>
@@ -736,15 +667,6 @@
         outboundBtn.classList.toggle('active', type === 'Outbound');
         outboundReason.style.display = type === 'Outbound' ? 'block' : 'none';
         inboundReason.style.display = type === 'Inbound' ? 'block' : 'none';
-        if (type) saveCallType(type);
-    }
-
-    function loadCallType() {
-        try {
-            const saved = localStorage.getItem('collectionsAssistantCallType');
-            if (saved === 'Inbound' || saved === 'Outbound') setCallType(saved);
-            else setCallType(null);
-        } catch (e) { setCallType(null); }
     }
 
     function updatePlanFields() {
@@ -834,19 +756,6 @@
         setTimeout(() => { btn.innerText = 'COPY NOTES'; }, 1500);
     }
 
-
-    function clearSnapshot() {
-        document.querySelectorAll('.snapshot input').forEach(input => input.value = '');
-        document.querySelectorAll('.snapshot select').forEach(select => select.value = '');
-    }
-
-    function saveCallType(type) {
-        try {
-            if (type) localStorage.setItem('collectionsAssistantCallType', type);
-            else localStorage.removeItem('collectionsAssistantCallType');
-        } catch (e) {}
-    }
-
     function resetTracker() {
         if (confirm('Confirm: Clear current call data?')) {
             checkboxes.forEach(cb => cb.checked = false);
@@ -862,8 +771,7 @@
             updatePlanFields();
             generatedNotes.value = '';
             notesStatus.style.display = 'none';
-            clearSnapshot();
-            document.getElementById('accountSnapshot').open = false;
+            setCallType(null);
             qmPrompt.open = false;
             qmPrompt.classList.remove('visible');
             updateProgress();
@@ -942,7 +850,7 @@
     }));
     document.getElementById('notePlan').addEventListener('change', updatePlanFields);
     loadQmGuidancePreference();
-    loadCallType();
+    setCallType(null);
     updatePlanFields();
     updateProgress();
 </script>
