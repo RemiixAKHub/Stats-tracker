@@ -167,7 +167,7 @@
             font-size: 11px;
             text-transform: uppercase;
         }
-        .btn-copy { background: #28a745; color: white; }
+        .btn-copy { background: #1e7e34; color: white; }
         .btn-reset { background: #dc3545; color: white; }
         button:hover { opacity: 0.9; }
 
@@ -269,7 +269,7 @@
             text-transform: uppercase;
         }
         .btn-generate { background: #0056b3; color: white; }
-        .btn-copy-generated { background: #28a745; color: white; }
+        .btn-copy-generated { background: #1e7e34; color: white; }
         .notes-status {
             display: none;
             margin-top: 5px;
@@ -390,7 +390,7 @@
         <div class="notes-content">
             <div class="notes-grid">
                 <div class="notes-field full">
-                    <label>Reason / contact</label>
+                    <label for="noteOutboundReason">Reason / contact</label>
                     <div id="outboundReason" class="conditional-section">
                         <input id="noteOutboundReason" type="text" value="Outbound call to chase customer for outstanding bill" readonly>
                     </div>
@@ -407,7 +407,7 @@
                             <label><input type="checkbox" class="inbound-reason" value="raising a service order / job">Raising a service order / job</label>
                             <label><input type="checkbox" class="inbound-reason" value="updating move information">Updating move information</label>
                         </div>
-                        <input id="noteInboundOther" type="text" placeholder="Other reason (optional)" style="margin-top:4px;">
+                        <input id="noteInboundOther" type="text" placeholder="Other reason (optional)" aria-label="Other reason" style="margin-top:4px;">
                     </div>
                 </div>
                 <div class="notes-field">
@@ -485,7 +485,7 @@
                 <label><input type="checkbox" id="nextDebt"> Debt recovery advised</label>
             </div>
 
-            <textarea class="generated-notes" id="generatedNotes" placeholder="Generated C4C notes will appear here..."></textarea>
+            <textarea class="generated-notes" id="generatedNotes" placeholder="Generated C4C notes will appear here..." aria-label="Generated C4C notes"></textarea>
             <div class="notes-actions">
                 <button class="btn-generate" onclick="generateNotes()">GENERATE NOTES</button>
                 <button class="btn-copy-generated" id="copyGeneratedBtn" onclick="copyGeneratedNotes()">COPY NOTES</button>
@@ -590,8 +590,7 @@
 
         if (reason) lines.push('Reason: ' + reason);
 
-        lines.push('');
-        lines.push('Actions:');
+        lines.push('', 'Actions:');
         addNoteLine(lines, 'Number of Occupiers', fieldValue('noteOccupiers'));
         addNoteLine(lines, 'Usage/Tariff', fieldValue('noteUsage'));
         addNoteLine(lines, 'Account Updates', fieldValue('noteUpdates'));
@@ -619,8 +618,7 @@
         if (document.getElementById('nextDebt').checked) nextSteps.push('Debt Recovery Advised');
 
         if (nextSteps.length) {
-            lines.push('');
-            lines.push('Next Steps:');
+            lines.push('', 'Next Steps:');
             nextSteps.forEach(step => lines.push(step));
         }
 
