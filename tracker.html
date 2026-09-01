@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Collections Assistant — Phase 4</title>
+    <title>Collections Assistant — Phase 3</title>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -280,6 +280,30 @@
 
         .conditional-section { margin-top: 7px; }
         .conditional-hidden { display: none; }
+        .fixed-reason {
+            padding: 6px 7px;
+            background: #eef5fb;
+            border: 1px solid #d7e5f3;
+            border-radius: 4px;
+            font-size: 10px;
+            line-height: 1.3;
+            color: #334155;
+        }
+        .sub-label {
+            margin-top: 6px;
+            font-size: 9px;
+            font-weight: bold;
+            color: #555;
+            text-transform: uppercase;
+        }
+        #noCallTypeReason {
+            padding: 6px 7px;
+            background: #fff8e1;
+            border: 1px solid #ffe082;
+            border-radius: 4px;
+            font-size: 9px;
+            color: #8a5a00;
+        }
         .reason-options {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -386,19 +410,6 @@
             background: #f4f4f4;
             color: #777;
         }
-
-        .snapshot { margin: 0 0 12px; border: 1px solid #c8d0d9; border-radius: 6px; background: #fafbfd; }
-        .snapshot summary { cursor: pointer; padding: 8px 10px; font-size: 11px; font-weight: bold; color: #0056b3; text-transform: uppercase; }
-        .snapshot[open] summary { border-bottom: 1px solid #e1e6ec; }
-        .snapshot-content { padding: 8px; }
-        .snapshot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-        .snapshot-field { min-width: 0; }
-        .snapshot-field.full { grid-column: 1 / -1; }
-        .snapshot-field label { display: block; border: 0; padding: 0 0 3px; font-size: 9px; font-weight: bold; color: #555; text-transform: uppercase; cursor: default; }
-        .snapshot-field input, .snapshot-field select { width: 100%; padding: 6px; border: 1px solid #c8d0d9; border-radius: 4px; font-size: 11px; background: #fff; }
-        .snapshot-actions { display: flex; justify-content: flex-end; margin-top: 6px; }
-        .snapshot-clear { border: 1px solid #c8d0d9; background: #fff; color: #555; border-radius: 4px; padding: 4px 7px; font-size: 9px; font-weight: bold; cursor: pointer; }
-        .snapshot-note { margin-top: 6px; font-size: 9px; color: #777; line-height: 1.3; }
         .phase-tag {
             text-align: center;
             font-size: 9px;
@@ -419,7 +430,7 @@
         </div>
         <div class="status-box completion">
             <div class="status-label">Call Completion</div>
-            <div class="status-value" id="completion">0 / 15</div>
+            <div class="status-value" id="completion">0 / 19</div>
             <div class="progress-track"><div class="progress-fill" id="completionFill"></div></div>
         </div>
     </div>
@@ -433,61 +444,6 @@
         <span class="qm-toggle-label">QM Guidance</span>
         <button id="qmGuidanceToggle" class="qm-toggle on" type="button" onclick="toggleQmGuidance()" aria-pressed="true">ON</button>
     </div>
-
-    <details class="snapshot" id="accountSnapshot">
-        <summary>Customer / Account Snapshot</summary>
-        <div class="snapshot-content">
-            <div class="snapshot-grid">
-                <div class="snapshot-field">
-                    <label for="snapCustomer">Customer</label>
-                    <input id="snapCustomer" type="text" placeholder="Customer name">
-                </div>
-                <div class="snapshot-field">
-                    <label for="snapAccount">Account</label>
-                    <input id="snapAccount" type="text" placeholder="Account number">
-                </div>
-                <div class="snapshot-field">
-                    <label for="snapBalance">Balance</label>
-                    <input id="snapBalance" type="text" placeholder="e.g. £486.21">
-                </div>
-                <div class="snapshot-field">
-                    <label for="snapStatus">Account status</label>
-                    <input id="snapStatus" type="text" placeholder="e.g. Active">
-                </div>
-                <div class="snapshot-field">
-                    <label for="snapStage">Collections stage</label>
-                    <input id="snapStage" type="text" placeholder="e.g. Reminder 3">
-                </div>
-                <div class="snapshot-field">
-                    <label for="snapOccupiers">Occupiers</label>
-                    <input id="snapOccupiers" type="text" placeholder="e.g. 2">
-                </div>
-                <div class="snapshot-field full">
-                    <label for="snapProperty">Property</label>
-                    <input id="snapProperty" type="text" placeholder="Property / address">
-                </div>
-                <div class="snapshot-field">
-                    <label for="snapPostcode">Postcode</label>
-                    <input id="snapPostcode" type="text" placeholder="e.g. SN2 XXX">
-                </div>
-                <div class="snapshot-field">
-                    <label for="snapPsr">PSR</label>
-                    <select id="snapPsr">
-                        <option value="">Select...</option>
-                        <option>Yes</option>
-                        <option>No</option>
-                        <option>N/A</option>
-                    </select>
-                </div>
-                <div class="snapshot-field full">
-                    <label for="snapLastPayment">Last payment</label>
-                    <input id="snapLastPayment" type="text" placeholder="e.g. £25 on 04/08/2026">
-                </div>
-            </div>
-            <div class="snapshot-note">Manual snapshot for quick reference. C4C integration is not part of this phase.</div>
-            <div class="snapshot-actions"><button class="snapshot-clear" type="button" onclick="clearSnapshot()">CLEAR SNAPSHOT</button></div>
-        </div>
-    </details>
 
     <div class="outstanding" id="outstanding">
         <strong>Still to complete</strong>
@@ -540,8 +496,18 @@
             <div class="notes-grid">
                 <div class="notes-field full">
                     <label>Reason / contact</label>
-                    <div id="outboundReason" class="conditional-section">
-                        <input id="noteOutboundReason" type="text" value="Outbound call to chase customer for outstanding bill" readonly>
+                    <div id="outboundReason" class="conditional-section conditional-hidden">
+                        <div class="fixed-reason">Reason: Outbound call to chase customer for outstanding bill</div>
+                        <div class="sub-label">Outbound outcome</div>
+                        <div class="reason-options">
+                            <label><input type="checkbox" class="outbound-outcome" value="DPA not passed">DPA not passed — call ended</label>
+                            <label><input type="checkbox" class="outbound-outcome" value="payment taken">Payment taken</label>
+                            <label><input type="checkbox" class="outbound-outcome" value="payment plan set">Payment plan set</label>
+                            <label><input type="checkbox" class="outbound-outcome" value="account information updated">Account information updated</label>
+                            <label><input type="checkbox" class="outbound-outcome" value="affordability / INE completed">Affordability / INE completed</label>
+                            <label><input type="checkbox" class="outbound-outcome" value="no payment / no plan">No payment / no plan</label>
+                        </div>
+                        <input id="noteOutboundOther" type="text" placeholder="Other outbound outcome (optional)" style="margin-top:4px;">
                     </div>
                     <div id="inboundReason" class="conditional-section conditional-hidden">
                         <input type="hidden" id="noteInboundPrefix" value="Inbound call:">
@@ -558,6 +524,7 @@
                         </div>
                         <input id="noteInboundOther" type="text" placeholder="Other reason (optional)" style="margin-top:4px;">
                     </div>
+                    <div id="noCallTypeReason" class="conditional-section">Select Inbound or Outbound above.</div>
                 </div>
                 <div class="notes-field">
                     <label for="noteOccupiers">Occupiers</label>
@@ -581,6 +548,7 @@
                         <option value="">Select...</option>
                         <option>Yes</option>
                         <option>No</option>
+                        <option>N/A</option>
                     </select>
                 </div>
                 <div class="notes-field">
@@ -609,6 +577,7 @@
                     <label for="notePlan">Plan set</label>
                     <select id="notePlan">
                         <option value="">Select...</option>
+                        <option>P2P</option>
                         <option>Yes</option>
                         <option>No</option>
                     </select>
@@ -618,7 +587,7 @@
                             <input id="notePlanAmount" type="text" placeholder="e.g. £25">
                         </div>
                         <div class="notes-field">
-                            <label for="notePlanMonths">Number of months</label>
+                            <label id="notePlanDurationLabel" for="notePlanMonths">Number of months</label>
                             <input id="notePlanMonths" type="text" placeholder="e.g. 6">
                         </div>
                     </div>
@@ -649,7 +618,7 @@
     </div>
 
     <div class="hint">REMINDER: Complete controllable checks before wrap-up. QM observations are assessed separately.</div>
-    <div class="phase-tag">Collections Assistant — Phase 4</div>
+    <div class="phase-tag">Collections Assistant — Phase 3.2</div>
 </div>
 
 <script>
@@ -667,9 +636,11 @@
     const outboundBtn = document.getElementById('outboundBtn');
     const outboundReason = document.getElementById('outboundReason');
     const inboundReason = document.getElementById('inboundReason');
+    const noCallTypeReason = document.getElementById('noCallTypeReason');
     const planDetails = document.getElementById('planDetails');
     const qmGuidanceToggle = document.getElementById('qmGuidanceToggle');
     let qmGuidanceEnabled = true;
+    let currentCallType = null;
 
     function setQmGuidance(enabled, persist = true) {
         qmGuidanceEnabled = enabled;
@@ -731,39 +702,57 @@
         }
     }
 
-    function setCallType(type) {
+    function setCallType(type, persist = true) {
+        currentCallType = type;
         inboundBtn.classList.toggle('active', type === 'Inbound');
         outboundBtn.classList.toggle('active', type === 'Outbound');
         outboundReason.style.display = type === 'Outbound' ? 'block' : 'none';
         inboundReason.style.display = type === 'Inbound' ? 'block' : 'none';
-        if (type) saveCallType(type);
-    }
-
-    function loadCallType() {
-        try {
-            const saved = localStorage.getItem('collectionsAssistantCallType');
-            if (saved === 'Inbound' || saved === 'Outbound') setCallType(saved);
-            else setCallType(null);
-        } catch (e) { setCallType(null); }
+        noCallTypeReason.style.display = type ? 'none' : 'block';
+        if (persist && type) {
+            try { localStorage.setItem('collectionsAssistantCallType', type); } catch (e) {}
+        }
     }
 
     function updatePlanFields() {
         const plan = document.getElementById('notePlan').value;
-        planDetails.style.display = plan === 'Yes' ? 'grid' : 'none';
-        if (plan !== 'Yes') {
+        const durationLabel = document.getElementById('notePlanDurationLabel');
+        const durationInput = document.getElementById('notePlanMonths');
+        const showDetails = plan === 'Yes' || plan === 'P2P';
+
+        planDetails.style.display = showDetails ? 'grid' : 'none';
+
+        if (plan === 'P2P') {
+            durationLabel.textContent = 'Agreement date';
+            durationInput.placeholder = 'e.g. 28/08/2026';
+        } else {
+            durationLabel.textContent = 'Number of months';
+            durationInput.placeholder = 'e.g. 6';
+        }
+
+        if (!showDetails) {
             document.getElementById('notePlanAmount').value = '';
-            document.getElementById('notePlanMonths').value = '';
+            durationInput.value = '';
         }
     }
 
     function buildReason() {
-        const inbound = inboundBtn.classList.contains('active');
-        if (!inbound) return document.getElementById('noteOutboundReason').value.trim();
+        if (currentCallType === 'Outbound') {
+            const outcomes = Array.from(document.querySelectorAll('.outbound-outcome:checked')).map(cb => cb.value);
+            const other = document.getElementById('noteOutboundOther').value.trim();
+            if (other) outcomes.push(other);
+            const base = 'Outbound call to chase customer for outstanding bill';
+            return outcomes.length ? base + ' + ' + outcomes.join(' + ') : base;
+        }
 
-        const parts = Array.from(document.querySelectorAll('.inbound-reason:checked')).map(cb => cb.value);
-        const other = document.getElementById('noteInboundOther').value.trim();
-        if (other) parts.push(other);
-        return parts.length ? 'Inbound call: ' + parts.join(' + ') : 'Inbound call:';
+        if (currentCallType === 'Inbound') {
+            const parts = Array.from(document.querySelectorAll('.inbound-reason:checked')).map(cb => cb.value);
+            const other = document.getElementById('noteInboundOther').value.trim();
+            if (other) parts.push(other);
+            return parts.length ? 'Inbound call: ' + parts.join(' + ') : 'Inbound call:';
+        }
+
+        return '';
     }
 
     function fieldValue(id) {
@@ -797,6 +786,13 @@
             let planDetail = 'Yes';
             if (amount) planDetail += ' - ' + amount;
             if (months) planDetail += ' for ' + months + ' months';
+            addNoteLine(lines, 'Plan Set', planDetail);
+        } else if (plan === 'P2P') {
+            const amount = fieldValue('notePlanAmount');
+            const date = fieldValue('notePlanMonths');
+            let planDetail = 'P2P';
+            if (amount) planDetail += ' - ' + amount;
+            if (date) planDetail += ' on ' + date;
             addNoteLine(lines, 'Plan Set', planDetail);
         } else {
             addNoteLine(lines, 'Plan Set', plan);
@@ -834,19 +830,6 @@
         setTimeout(() => { btn.innerText = 'COPY NOTES'; }, 1500);
     }
 
-
-    function clearSnapshot() {
-        document.querySelectorAll('.snapshot input').forEach(input => input.value = '');
-        document.querySelectorAll('.snapshot select').forEach(select => select.value = '');
-    }
-
-    function saveCallType(type) {
-        try {
-            if (type) localStorage.setItem('collectionsAssistantCallType', type);
-            else localStorage.removeItem('collectionsAssistantCallType');
-        } catch (e) {}
-    }
-
     function resetTracker() {
         if (confirm('Confirm: Clear current call data?')) {
             checkboxes.forEach(cb => cb.checked = false);
@@ -856,14 +839,17 @@
             });
             document.querySelectorAll('.notes-builder select').forEach(select => select.value = '');
             document.querySelectorAll('.inbound-reason').forEach(cb => cb.checked = false);
+            document.querySelectorAll('.outbound-outcome').forEach(cb => cb.checked = false);
             document.getElementById('noteInboundOther').value = '';
+            document.getElementById('noteOutboundOther').value = '';
             document.getElementById('notePlanAmount').value = '';
             document.getElementById('notePlanMonths').value = '';
             updatePlanFields();
             generatedNotes.value = '';
             notesStatus.style.display = 'none';
-            clearSnapshot();
-            document.getElementById('accountSnapshot').open = false;
+            // Keep the selected call type across resets: agents are assigned either inbound or outbound for the session.
+            // The fixed outbound reason is derived from call type, so it is never stored in a field that reset can erase.
+            setCallType(currentCallType);
             qmPrompt.open = false;
             qmPrompt.classList.remove('visible');
             updateProgress();
@@ -942,7 +928,12 @@
     }));
     document.getElementById('notePlan').addEventListener('change', updatePlanFields);
     loadQmGuidancePreference();
-    loadCallType();
+    try {
+        const savedCallType = localStorage.getItem('collectionsAssistantCallType');
+        setCallType(savedCallType === 'Inbound' || savedCallType === 'Outbound' ? savedCallType : null, false);
+    } catch (e) {
+        setCallType(null, false);
+    }
     updatePlanFields();
     updateProgress();
 </script>

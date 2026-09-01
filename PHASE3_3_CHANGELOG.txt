@@ -1,0 +1,42 @@
+COLLECTIONS ASSISTANT — PHASE 3.3 CHANGELOG
+===========================================
+
+Date: 28/08/2026
+
+Changes
+-------
+1. Fixed outbound reason persistence/availability.
+   - Outbound reason is derived from the selected call type rather than a text field.
+   - Generated notes always include:
+     Reason: Outbound call to chase customer for outstanding bill
+   - Reset cannot erase the fixed outbound reason.
+
+2. PSR dropdown now includes N/A.
+
+3. Plan Set now supports three states:
+   - P2P
+   - Yes
+   - No
+
+4. Conditional Plan Set fields updated:
+   - Yes -> Payment amount + Number of months
+   - P2P -> Payment amount + Agreement date
+   - No -> No additional fields shown
+
+5. P2P note generation:
+   - Example: Plan Set: P2P - £25 on 28/08/2026
+
+6. Existing behaviour retained:
+   - Inbound/Outbound selection survives Reset All.
+   - QM Guidance toggle remains available.
+   - Inbound reason builder remains unchanged.
+   - Outbound outcome checklist remains available.
+
+Testing
+-------
+- JavaScript syntax check: PASSED
+- Package integrity: to be checked after packaging
+
+Next
+----
+Continue Phase 4 account snapshot / C4C information access work when ready.
