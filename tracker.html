@@ -771,6 +771,18 @@
         if (value) lines.push('- ' + label + ': ' + value);
     }
 
+    function buildPlanDetail(plan) {
+        if (plan !== 'Yes' && plan !== 'P2P') return plan;
+
+        const amount = fieldValue('notePlanAmount');
+        const duration = fieldValue('notePlanMonths');
+        let detail = plan;
+        if (amount) detail += ' - ' + amount;
+        if (duration) {
+            detail += plan === 'Yes' ? ' for ' + duration + ' months' : ' on ' + duration;
+        }
+        return detail;
+    }
     function generateNotes() {
         const lines = [];
         const reason = buildReason();
@@ -787,23 +799,7 @@
         addNoteLine(lines, 'Affordability Check', fieldValue('noteAffordability'));
         addNoteLine(lines, 'Payment Made', fieldValue('notePayment'));
         const plan = fieldValue('notePlan');
-        if (plan === 'Yes') {
-            const amount = fieldValue('notePlanAmount');
-            const months = fieldValue('notePlanMonths');
-            let planDetail = 'Yes';
-            if (amount) planDetail += ' - ' + amount;
-            if (months) planDetail += ' for ' + months + ' months';
-            addNoteLine(lines, 'Plan Set', planDetail);
-        } else if (plan === 'P2P') {
-            const amount = fieldValue('notePlanAmount');
-            const date = fieldValue('notePlanMonths');
-            let planDetail = 'P2P';
-            if (amount) planDetail += ' - ' + amount;
-            if (date) planDetail += ' on ' + date;
-            addNoteLine(lines, 'Plan Set', planDetail);
-        } else {
-            addNoteLine(lines, 'Plan Set', plan);
-        }
+        addNoteLine(lines, 'Plan Set', buildPlanDetail(plan));
         addNoteLine(lines, 'Additional Info', fieldValue('noteAdditional'));
 
         const nextSteps = [];
