@@ -29,60 +29,41 @@ jobs:
           path = Path('tracker.html')
           text = path.read_text(encoding='utf-8')
 
-          old = """    function addNoteLine(lines, label, value) {
-              if (value) lines.push('- ' + label + ': ' + value);
-          }
+          generate_marker = "    function generateNotes() {"
+          if text.count(generate_marker) != 1:
+              raise SystemExit(f'Expected generateNotes marker once, found {text.count(generate_marker)}')
 
-          function generateNotes() {
-          """
-          new = """    function addNoteLine(lines, label, value) {
-              if (value) lines.push('- ' + label + ': ' + value);
-          }
+          helper = "\n".join([
+              "    function buildPlanDetail(plan) {",
+              "        if (plan !== 'Yes' && plan !== 'P2P') return plan;",
+              "",
+              "        const amount = fieldValue('notePlanAmount');",
+              "        const duration = fieldValue('notePlanMonths');",
+              "        let detail = plan;",
+              "        if (amount) detail += ' - ' + amount;",
+              "        if (duration) {",
+              "            detail += plan === 'Yes' ? ' for ' + duration + ' months' : ' on ' + duration;",
+              "        }",
+              "        return detail;",
+              "    }",
+              "",
+          ])
+          text = text.replace(generate_marker, helper + generate_marker, 1)
 
-          function buildPlanDetail(plan) {
-              if (plan !== 'Yes' && plan !== 'P2P') return plan;
+          function_start = text.index(generate_marker)
+          plan_start_marker = "        const plan = fieldValue('notePlan');"
+          plan_end_marker = "        addNoteLine(lines, 'Additional Info', fieldValue('noteAdditional'));"
+          plan_start = text.index(plan_start_marker, function_start)
+          plan_end = text.index(plan_end_marker, plan_start)
+          replacement = "\n".join([
+              "        const plan = fieldValue('notePlan');",
+              "        addNoteLine(lines, 'Plan Set', buildPlanDetail(plan));",
+              "",
+          ])
+          text = text[:plan_start] + replacement + text[plan_end:]
 
-              const amount = fieldValue('notePlanAmount');
-              const duration = fieldValue('notePlanMonths');
-              let detail = plan;
-              if (amount) detail += ' - ' + amount;
-              if (duration) {
-                  detail += plan === 'Yes' ? ' for ' + duration + ' months' : ' on ' + duration;
-              }
-              return detail;
-          }
-
-          function generateNotes() {
-          """
-          if text.count(old) != 1:
-              raise SystemExit(f'Expected helper insertion anchor once, found {text.count(old)}')
-          text = text.replace(old, new, 1)
-
-          old_plan = """        const plan = fieldValue('notePlan');
-                  if (plan === 'Yes') {
-                      const amount = fieldValue('notePlanAmount');
-                      const months = fieldValue('notePlanMonths');
-                      let planDetail = 'Yes';
-                      if (amount) planDetail += ' - ' + amount;
-                      if (months) planDetail += ' for ' + months + ' months';
-                      addNoteLine(lines, 'Plan Set', planDetail);
-                  } else if (plan === 'P2P') {
-                      const amount = fieldValue('notePlanAmount');
-                      const date = fieldValue('notePlanMonths');
-                      let planDetail = 'P2P';
-                      if (amount) planDetail += ' - ' + amount;
-                      if (date) planDetail += ' on ' + date;
-                      addNoteLine(lines, 'Plan Set', planDetail);
-                  } else {
-                      addNoteLine(lines, 'Plan Set', plan);
-                  }
-          """
-          new_plan = """        const plan = fieldValue('notePlan');
-                  addNoteLine(lines, 'Plan Set', buildPlanDetail(plan));
-          """
-          if text.count(old_plan) != 1:
-              raise SystemExit(f'Expected plan branch once, found {text.count(old_plan)}')
-          text = text.replace(old_plan, new_plan, 1)
+          if "if (plan === 'Yes')" in text[text.index(generate_marker):text.index('    async function copyGeneratedNotes()')]:
+              raise SystemExit('Old plan branch still present inside generateNotes')
 
           path.write_text(text, encoding='utf-8')
           PY
