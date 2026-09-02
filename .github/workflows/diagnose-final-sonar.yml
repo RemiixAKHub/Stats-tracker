@@ -1,4 +1,4 @@
-name: Diagnose final Sonar issue
+name: Fix final Sonar issue
 
 on:
   push:
@@ -8,34 +8,106 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  diagnose:
+  fix:
     runs-on: ubuntu-latest
     steps:
-      - name: Query unresolved Sonar maintainability issues
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Refactor generateNotes cognitive complexity
         shell: bash
         run: |
           set -euo pipefail
-          response="$(curl -fsSL --get 'https://sonarcloud.io/api/issues/search' \
-            --data-urlencode 'componentKeys=jacobsscoots_Stats-tracker' \
-            --data-urlencode 'resolved=false' \
-            --data-urlencode 'types=CODE_SMELL' \
-            --data-urlencode 'ps=100')"
-          printf '%s' "$response" | python3 -c '
-          import json, sys
-          data = json.load(sys.stdin)
-          issues = data.get("issues", [])
-          print(f"TOTAL={len(issues)}")
-          for i, issue in enumerate(issues, 1):
-              impacts = ", ".join(f"{x.get(chr(115)+chr(111)+chr(102)+chr(116)+chr(119)+chr(97)+chr(114)+chr(101)+chr(81)+chr(117)+chr(97)+chr(108)+chr(105)+chr(116)+chr(121))}:{x.get(chr(115)+chr(101)+chr(118)+chr(101)+chr(114)+chr(105)+chr(116)+chr(121))}" for x in issue.get("impacts", []))
-              print(f"ISSUE {i}")
-              print("key=" + str(issue.get("key")))
-              print("rule=" + str(issue.get("rule")))
-              print("message=" + str(issue.get("message")))
-              print("component=" + str(issue.get("component")))
-              print("line=" + str(issue.get("line")))
-              print("cleanCodeAttribute=" + str(issue.get("cleanCodeAttribute")))
-              print("impacts=" + impacts)
-          '
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('tracker.html')
+          text = path.read_text(encoding='utf-8')
+
+          old = """    function addNoteLine(lines, label, value) {
+              if (value) lines.push('- ' + label + ': ' + value);
+          }
+
+          function generateNotes() {
+          """
+          new = """    function addNoteLine(lines, label, value) {
+              if (value) lines.push('- ' + label + ': ' + value);
+          }
+
+          function buildPlanDetail(plan) {
+              if (plan !== 'Yes' && plan !== 'P2P') return plan;
+
+              const amount = fieldValue('notePlanAmount');
+              const duration = fieldValue('notePlanMonths');
+              let detail = plan;
+              if (amount) detail += ' - ' + amount;
+              if (duration) {
+                  detail += plan === 'Yes' ? ' for ' + duration + ' months' : ' on ' + duration;
+              }
+              return detail;
+          }
+
+          function generateNotes() {
+          """
+          if text.count(old) != 1:
+              raise SystemExit(f'Expected helper insertion anchor once, found {text.count(old)}')
+          text = text.replace(old, new, 1)
+
+          old_plan = """        const plan = fieldValue('notePlan');
+                  if (plan === 'Yes') {
+                      const amount = fieldValue('notePlanAmount');
+                      const months = fieldValue('notePlanMonths');
+                      let planDetail = 'Yes';
+                      if (amount) planDetail += ' - ' + amount;
+                      if (months) planDetail += ' for ' + months + ' months';
+                      addNoteLine(lines, 'Plan Set', planDetail);
+                  } else if (plan === 'P2P') {
+                      const amount = fieldValue('notePlanAmount');
+                      const date = fieldValue('notePlanMonths');
+                      let planDetail = 'P2P';
+                      if (amount) planDetail += ' - ' + amount;
+                      if (date) planDetail += ' on ' + date;
+                      addNoteLine(lines, 'Plan Set', planDetail);
+                  } else {
+                      addNoteLine(lines, 'Plan Set', plan);
+                  }
+          """
+          new_plan = """        const plan = fieldValue('notePlan');
+                  addNoteLine(lines, 'Plan Set', buildPlanDetail(plan));
+          """
+          if text.count(old_plan) != 1:
+              raise SystemExit(f'Expected plan branch once, found {text.count(old_plan)}')
+          text = text.replace(old_plan, new_plan, 1)
+
+          path.write_text(text, encoding='utf-8')
+          PY
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          text = Path('tracker.html').read_text(encoding='utf-8')
+          scripts = re.findall(r'<script>(.*?)</script>', text, flags=re.S)
+          if len(scripts) != 1:
+              raise SystemExit(f'Expected one inline script, found {len(scripts)}')
+          Path('/tmp/tracker.js').write_text(scripts[0], encoding='utf-8')
+          PY
+          node --check /tmp/tracker.js
+          git diff --check
+
+      - name: Commit fix and remove helper
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/diagnose-final-sonar.yml
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'fix: reduce generateNotes cognitive complexity'
+          git push origin HEAD:main
