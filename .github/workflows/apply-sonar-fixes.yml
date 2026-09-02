@@ -1,0 +1,75 @@
+name: Apply focused Sonar fixes
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/apply-sonar-fixes.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Apply and verify tracker fixes
+        shell: bash
+        run: |
+          git pull --rebase origin main
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('tracker.html')
+          text = path.read_text(encoding='utf-8')
+
+          replacements = [
+              ('.btn-copy { background: #28a745; color: white; }', '.btn-copy { background: #1e7e34; color: white; }'),
+              ('.btn-copy-generated { background: #28a745; color: white; }', '.btn-copy-generated { background: #1e7e34; color: white; }'),
+              ('                    <label>Reason / contact</label>', '                    <div class="sub-label">Reason / contact</div>'),
+              ('<input id="noteOutboundOther" type="text" placeholder="Other outbound outcome (optional)" style="margin-top:4px;">', '<input id="noteOutboundOther" type="text" placeholder="Other outbound outcome (optional)" aria-label="Other outbound outcome" style="margin-top:4px;">'),
+              ('<input id="noteInboundOther" type="text" placeholder="Other reason (optional)" style="margin-top:4px;">', '<input id="noteInboundOther" type="text" placeholder="Other reason (optional)" aria-label="Other reason" style="margin-top:4px;">'),
+              ('<textarea class="generated-notes" id="generatedNotes" placeholder="Generated C4C notes will appear here..."></textarea>', '<textarea class="generated-notes" id="generatedNotes" placeholder="Generated C4C notes will appear here..." aria-label="Generated C4C notes"></textarea>'),
+              ("        lines.push('');\n        lines.push('Actions:');", "        lines.push('', 'Actions:');"),
+              ("            lines.push('');\n            lines.push('Next Steps:');", "            lines.push('', 'Next Steps:');"),
+              ("            try { localStorage.setItem('collectionsAssistantQmGuidance', enabled ? 'on' : 'off'); } catch (e) {}", "            try {\n                localStorage.setItem('collectionsAssistantQmGuidance', enabled ? 'on' : 'off');\n            } catch {\n                // Preference persistence is optional when browser storage is unavailable.\n            }"),
+              ("            try { localStorage.setItem('collectionsAssistantCallType', type); } catch (e) {}", "            try {\n                localStorage.setItem('collectionsAssistantCallType', type);\n            } catch {\n                // Call-type persistence is optional when browser storage is unavailable.\n            }"),
+              ('        } catch (e) {\n            setQmGuidance(true, false);', '        } catch {\n            setQmGuidance(true, false);'),
+              ('        } catch (err) {\n            generatedNotes.select();', '        } catch {\n            generatedNotes.select();'),
+              ('    } catch (e) {\n        setCallType(null, false);', '    } catch {\n        setCallType(null, false);'),
+          ]
+
+          for old, new in replacements:
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'Expected exactly one match, got {count}: {old[:100]!r}')
+              text = text.replace(old, new, 1)
+
+          path.write_text(text, encoding='utf-8')
+          PY
+
+          python - <<'PY'
+          from pathlib import Path
+          text = Path('tracker.html').read_text(encoding='utf-8')
+          start = text.index('<script>') + len('<script>')
+          end = text.index('</script>', start)
+          Path('/tmp/tracker.js').write_text(text[start:end], encoding='utf-8')
+          PY
+          node --check /tmp/tracker.js
+          git diff --check
+
+      - name: Commit the patch and remove this helper
+        shell: bash
+        run: |
+          git rm .github/workflows/apply-sonar-fixes.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tracker.html
+          git commit -m "fix: resolve reliability and maintainability regressions"
+          git push origin HEAD:main
