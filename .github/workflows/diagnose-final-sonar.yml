@@ -1,0 +1,41 @@
+name: Diagnose final Sonar issue
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/diagnose-final-sonar.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query unresolved Sonar maintainability issues
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl -fsSL --get 'https://sonarcloud.io/api/issues/search' \
+            --data-urlencode 'componentKeys=jacobsscoots_Stats-tracker' \
+            --data-urlencode 'resolved=false' \
+            --data-urlencode 'types=CODE_SMELL' \
+            --data-urlencode 'ps=100')"
+          printf '%s' "$response" | python3 -c '
+          import json, sys
+          data = json.load(sys.stdin)
+          issues = data.get("issues", [])
+          print(f"TOTAL={len(issues)}")
+          for i, issue in enumerate(issues, 1):
+              impacts = ", ".join(f"{x.get(chr(115)+chr(111)+chr(102)+chr(116)+chr(119)+chr(97)+chr(114)+chr(101)+chr(81)+chr(117)+chr(97)+chr(108)+chr(105)+chr(116)+chr(121))}:{x.get(chr(115)+chr(101)+chr(118)+chr(101)+chr(114)+chr(105)+chr(116)+chr(121))}" for x in issue.get("impacts", []))
+              print(f"ISSUE {i}")
+              print("key=" + str(issue.get("key")))
+              print("rule=" + str(issue.get("rule")))
+              print("message=" + str(issue.get("message")))
+              print("component=" + str(issue.get("component")))
+              print("line=" + str(issue.get("line")))
+              print("cleanCodeAttribute=" + str(issue.get("cleanCodeAttribute")))
+              print("impacts=" + impacts)
+          '
