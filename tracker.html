@@ -167,7 +167,7 @@
             font-size: 11px;
             text-transform: uppercase;
         }
-        .btn-copy { background: #28a745; color: white; }
+        .btn-copy { background: #1e7e34; color: white; }
         .btn-reset { background: #dc3545; color: white; }
         button:hover { opacity: 0.9; }
 
@@ -269,7 +269,7 @@
             text-transform: uppercase;
         }
         .btn-generate { background: #0056b3; color: white; }
-        .btn-copy-generated { background: #28a745; color: white; }
+        .btn-copy-generated { background: #1e7e34; color: white; }
         .notes-status {
             display: none;
             margin-top: 5px;
@@ -495,7 +495,7 @@
         <div class="notes-content">
             <div class="notes-grid">
                 <div class="notes-field full">
-                    <label>Reason / contact</label>
+                    <div class="sub-label">Reason / contact</div>
                     <div id="outboundReason" class="conditional-section conditional-hidden">
                         <div class="fixed-reason">Reason: Outbound call to chase customer for outstanding bill</div>
                         <div class="sub-label">Outbound outcome</div>
@@ -507,7 +507,7 @@
                             <label><input type="checkbox" class="outbound-outcome" value="affordability / INE completed">Affordability / INE completed</label>
                             <label><input type="checkbox" class="outbound-outcome" value="no payment / no plan">No payment / no plan</label>
                         </div>
-                        <input id="noteOutboundOther" type="text" placeholder="Other outbound outcome (optional)" style="margin-top:4px;">
+                        <input id="noteOutboundOther" type="text" placeholder="Other outbound outcome (optional)" aria-label="Other outbound outcome" style="margin-top:4px;">
                     </div>
                     <div id="inboundReason" class="conditional-section conditional-hidden">
                         <input type="hidden" id="noteInboundPrefix" value="Inbound call:">
@@ -522,7 +522,7 @@
                             <label><input type="checkbox" class="inbound-reason" value="raising a service order / job">Raising a service order / job</label>
                             <label><input type="checkbox" class="inbound-reason" value="updating move information">Updating move information</label>
                         </div>
-                        <input id="noteInboundOther" type="text" placeholder="Other reason (optional)" style="margin-top:4px;">
+                        <input id="noteInboundOther" type="text" placeholder="Other reason (optional)" aria-label="Other reason" style="margin-top:4px;">
                     </div>
                     <div id="noCallTypeReason" class="conditional-section">Select Inbound or Outbound above.</div>
                 </div>
@@ -604,7 +604,7 @@
                 <label><input type="checkbox" id="nextDebt"> Debt recovery advised</label>
             </div>
 
-            <textarea class="generated-notes" id="generatedNotes" placeholder="Generated C4C notes will appear here..."></textarea>
+            <textarea class="generated-notes" id="generatedNotes" placeholder="Generated C4C notes will appear here..." aria-label="Generated C4C notes"></textarea>
             <div class="notes-actions">
                 <button class="btn-generate" onclick="generateNotes()">GENERATE NOTES</button>
                 <button class="btn-copy-generated" id="copyGeneratedBtn" onclick="copyGeneratedNotes()">COPY NOTES</button>
@@ -653,7 +653,11 @@
             qmPrompt.classList.remove('visible');
         }
         if (persist) {
-            try { localStorage.setItem('collectionsAssistantQmGuidance', enabled ? 'on' : 'off'); } catch (e) {}
+            try {
+                localStorage.setItem('collectionsAssistantQmGuidance', enabled ? 'on' : 'off');
+            } catch {
+                // Preference persistence is optional when browser storage is unavailable.
+            }
         }
     }
 
@@ -666,7 +670,7 @@
             const saved = localStorage.getItem('collectionsAssistantQmGuidance');
             if (saved === 'on' || saved === 'off') setQmGuidance(saved === 'on', false);
             else setQmGuidance(true, false);
-        } catch (e) {
+        } catch {
             setQmGuidance(true, false);
         }
     }
@@ -710,7 +714,11 @@
         inboundReason.style.display = type === 'Inbound' ? 'block' : 'none';
         noCallTypeReason.style.display = type ? 'none' : 'block';
         if (persist && type) {
-            try { localStorage.setItem('collectionsAssistantCallType', type); } catch (e) {}
+            try {
+                localStorage.setItem('collectionsAssistantCallType', type);
+            } catch {
+                // Call-type persistence is optional when browser storage is unavailable.
+            }
         }
     }
 
@@ -763,14 +771,25 @@
         if (value) lines.push('- ' + label + ': ' + value);
     }
 
+    function buildPlanDetail(plan) {
+        if (plan !== 'Yes' && plan !== 'P2P') return plan;
+
+        const amount = fieldValue('notePlanAmount');
+        const duration = fieldValue('notePlanMonths');
+        let detail = plan;
+        if (amount) detail += ' - ' + amount;
+        if (duration) {
+            detail += plan === 'Yes' ? ' for ' + duration + ' months' : ' on ' + duration;
+        }
+        return detail;
+    }
     function generateNotes() {
         const lines = [];
         const reason = buildReason();
 
         if (reason) lines.push('Reason: ' + reason);
 
-        lines.push('');
-        lines.push('Actions:');
+        lines.push('', 'Actions:');
         addNoteLine(lines, 'Number of Occupiers', fieldValue('noteOccupiers'));
         addNoteLine(lines, 'Usage/Tariff', fieldValue('noteUsage'));
         addNoteLine(lines, 'Account Updates', fieldValue('noteUpdates'));
@@ -780,23 +799,7 @@
         addNoteLine(lines, 'Affordability Check', fieldValue('noteAffordability'));
         addNoteLine(lines, 'Payment Made', fieldValue('notePayment'));
         const plan = fieldValue('notePlan');
-        if (plan === 'Yes') {
-            const amount = fieldValue('notePlanAmount');
-            const months = fieldValue('notePlanMonths');
-            let planDetail = 'Yes';
-            if (amount) planDetail += ' - ' + amount;
-            if (months) planDetail += ' for ' + months + ' months';
-            addNoteLine(lines, 'Plan Set', planDetail);
-        } else if (plan === 'P2P') {
-            const amount = fieldValue('notePlanAmount');
-            const date = fieldValue('notePlanMonths');
-            let planDetail = 'P2P';
-            if (amount) planDetail += ' - ' + amount;
-            if (date) planDetail += ' on ' + date;
-            addNoteLine(lines, 'Plan Set', planDetail);
-        } else {
-            addNoteLine(lines, 'Plan Set', plan);
-        }
+        addNoteLine(lines, 'Plan Set', buildPlanDetail(plan));
         addNoteLine(lines, 'Additional Info', fieldValue('noteAdditional'));
 
         const nextSteps = [];
@@ -805,8 +808,7 @@
         if (document.getElementById('nextDebt').checked) nextSteps.push('Debt Recovery Advised');
 
         if (nextSteps.length) {
-            lines.push('');
-            lines.push('Next Steps:');
+            lines.push('', 'Next Steps:');
             nextSteps.forEach(step => lines.push(step));
         }
 
@@ -820,7 +822,7 @@
 
         try {
             await navigator.clipboard.writeText(generatedNotes.value);
-        } catch (err) {
+        } catch {
             generatedNotes.select();
             document.execCommand('copy');
         }
@@ -931,7 +933,7 @@
     try {
         const savedCallType = localStorage.getItem('collectionsAssistantCallType');
         setCallType(savedCallType === 'Inbound' || savedCallType === 'Outbound' ? savedCallType : null, false);
-    } catch (e) {
+    } catch {
         setCallType(null, false);
     }
     updatePlanFields();
